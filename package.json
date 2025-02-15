@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
-    "start": "tsc && node --loader ts-node/esm src/index.ts",
+    "start": "tsc && node --loader ts-node/esm --no-warnings src/index.ts",
     "clean": "./scripts/clean.sh",
     "start:service:all": "pm2 start pnpm --name=\"all\" --restart-delay=3000 --max-restarts=10 -- run start:all",
     "stop:service:all": "pm2 stop all"
@@ -13,6 +13,7 @@
   "dependencies": {
     "@elizaos/adapter-postgres": "0.1.9",
     "@elizaos/adapter-sqlite": "0.1.9",
+    "@elizaos/adapter-supabase": "0.25.6-alpha.1",
     "@elizaos/client-auto": "0.1.9",
     "@elizaos/client-direct": "0.1.9",
     "@elizaos/client-discord": "0.1.9",
@@ -24,9 +25,12 @@
     "@elizaos/plugin-node": "0.1.9",
     "@elizaos/plugin-solana": "0.1.9",
     "@elizaos/plugin-starknet": "0.1.9",
+    "@supabase/supabase-js": "^2.48.1",
     "@tavily/core": "0.0.2",
     "amqplib": "0.10.5",
     "better-sqlite3": "11.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "fs": "0.0.1-security",
     "net": "1.0.2",
     "path": "0.12.7",
@@ -36,7 +40,7 @@
     "yargs": "17.7.2"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20.12.0"
   },
   "pnpm": {
     "overrides": {
@@ -44,9 +48,13 @@
     }
   },
   "devDependencies": {
+    "@types/big.js": "^6.2.2",
+    "@types/pg": "^8.11.11",
+    "@types/promise-retry": "^1.1.6",
+    "@types/w3c-web-usb": "^1.0.10",
+    "pm2": "5.4.3",
     "ts-node": "10.9.2",
     "tsup": "8.3.5",
-    "typescript": "5.6.3",
-    "pm2": "5.4.3" 
+    "typescript": "5.6.3"
   }
 }

@@ -18,31 +18,35 @@ async function handleUserInput(input, agentId) {
   }
 
   try {
-    const serverPort = parseInt(settings.SERVER_PORT || "3000");
+    const serverPort = parseInt(settings.SERVER_PORT || "3001");
 
-    const response = await fetch(
-      `http://localhost:${serverPort}/${agentId}/message`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: input,
-          userId: "user",
-          userName: "User",
-        }),
-      }
-    );
+    //generate modoel dengan proomprt
+
+    const response = await fetch(`http://localhost:11434/${agentId}/message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${settings.API_KEY}`,
+      },
+      body: JSON.stringify({
+        text: input,
+        userId: "user",
+        userName: "User",
+      }),
+    });
 
     const data = await response.json();
-    data.forEach((message) => console.log(`${"Agent"}: ${message.text}`));
+    // Handle both array and single response formats
+    const messages = Array.isArray(data) ? data : [data];
+    messages.forEach((message) => console.log(`${"Agent"}: ${message.text}`));
   } catch (error) {
     console.error("Error fetching response:", error);
   }
 }
 
-export function startChat(characters) {
+export function startChat(characters, runtime) {
   function chat() {
-    const agentId = characters[0].name ?? "Agent";
+    const agentId = runtime.agentId;
     rl.question("You: ", async (input) => {
       await handleUserInput(input, agentId);
       if (input.toLowerCase() !== "exit") {

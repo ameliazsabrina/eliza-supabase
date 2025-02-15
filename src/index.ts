@@ -2,6 +2,8 @@ import { DirectClient } from "@elizaos/client-direct";
 import {
   AgentRuntime,
   elizaLogger,
+  embed,
+  IAgentRuntime,
   settings,
   stringToUuid,
   type Character,
@@ -44,7 +46,7 @@ export function createAgent(
   elizaLogger.success(
     elizaLogger.successesTitle,
     "Creating runtime for character",
-    character.name,
+    character.name
   );
 
   nodePlugin ??= createNodePlugin();
@@ -100,7 +102,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
   } catch (error) {
     elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
-      error,
+      error
     );
     console.error(error);
     throw error;
@@ -125,6 +127,33 @@ const checkPortAvailable = (port: number): Promise<boolean> => {
     server.listen(port);
   });
 };
+
+async function storeMemory(
+  runtime: IAgentRuntime,
+  content: string,
+  roomId: string,
+  userId: string
+) {
+  const embedding = await embed(runtime, content);
+
+  await runtime.databaseAdapter.createMemory({
+    roomId: stringToUuid(roomId),
+    agentId: runtime.agentId,
+    userId: stringToUuid(userId),
+    content: { text: content },
+    embedding,
+  });
+}
+
+async function searchMemories(runtime: IAgentRuntime, query: string) {
+  const embedding = await embed(runtime, query);
+
+  return runtime.databaseAdapter.searchMemoriesByEmbedding(embedding, {
+    match_threshold: 0.8,
+    count: 10,
+    tableName: "memories",
+  });
+}
 
 const startAgents = async () => {
   const directClient = new DirectClient();
@@ -165,9 +194,9 @@ const startAgents = async () => {
   }
 
   const isDaemonProcess = process.env.DAEMON_PROCESS === "true";
-  if(!isDaemonProcess) {
+  if (!isDaemonProcess) {
     elizaLogger.log("Chat started. Type 'exit' to quit.");
-    const chat = startChat(characters);
+    const chat = startChat(characters, directClient);
     chat();
   }
 };

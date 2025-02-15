@@ -38,12 +38,16 @@ USER node
 # Create a new stage for the final image
 FROM node:23.3.0-slim
 
-# Install runtime dependencies if needed
+# Install runtime dependencies
 RUN npm install -g pnpm@9.15.1
 RUN apt-get update && \
-    apt-get install -y git python3 && \
+    apt-get install -y git python3 curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+ENV PATH=$PATH:/usr/local/bin
 
 WORKDIR /app
 
@@ -56,6 +60,10 @@ COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/tsconfig.json /app/
 COPY --from=builder /app/pnpm-lock.yaml /app/
 
+# Install Ollama model and rebuild native dependencies
+RUN ollama pull qwen2:1.8b && \
+    pnpm rebuild better-sqlite3
+
 EXPOSE 3000
-# Set the command to run the application
-CMD ["pnpm", "start", "--non-interactive"]
+# Start Ollama service and application
+CMD ["sh", "-c", "ollama serve & pnpm start --non-interactive"]

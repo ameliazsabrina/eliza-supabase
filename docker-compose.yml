@@ -1,0 +1,7 @@
+services:
+  aghanim:
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: "4"
