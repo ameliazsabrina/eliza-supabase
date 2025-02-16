@@ -24,7 +24,10 @@ import {
   loadCharacters,
   parseArguments,
 } from "./config/index.ts";
-import { initializeDatabase } from "./database/index.ts";
+import {
+  initializeDatabase,
+  validateDatabaseConnection,
+} from "./database/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -205,3 +208,21 @@ startAgents().catch((error) => {
   elizaLogger.error("Unhandled error in startAgents:", error);
   process.exit(1);
 });
+
+// Log messages at different levels
+elizaLogger.info("This is an info message");
+elizaLogger.debug("This is a debug message");
+elizaLogger.warn("This is a warning message");
+elizaLogger.error("This is an error message");
+elizaLogger.success("This is a success message");
+
+async function testDatabase() {
+  try {
+    const db = initializeDatabase("./data");
+    await validateDatabaseConnection(db);
+  } catch (error) {
+    elizaLogger.error("Database test failed:", error);
+  }
+}
+
+testDatabase();
