@@ -139,13 +139,17 @@ async function storeMemory(
 ) {
   const embedding = await embed(runtime, content);
 
-  await runtime.databaseAdapter.createMemory({
-    roomId: stringToUuid(roomId),
-    agentId: runtime.agentId,
-    userId: stringToUuid(userId),
-    content: { text: content },
-    embedding,
-  });
+  await runtime.databaseAdapter.createMemory(
+    {
+      roomId: stringToUuid(roomId),
+      agentId: runtime.agentId,
+      userId: stringToUuid(userId),
+      content: { text: content },
+      embedding: embedding,
+    },
+    "memories",
+    true
+  );
 }
 
 async function searchMemories(runtime: IAgentRuntime, query: string) {

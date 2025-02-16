@@ -1,5 +1,6 @@
 import { settings } from "@elizaos/core";
 import readline from "readline";
+import axios from "axios";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -18,24 +19,24 @@ async function handleUserInput(input, agentId) {
   }
 
   try {
-    const serverPort = parseInt(settings.SERVER_PORT || "3001");
+    const serverPort = parseInt(settings.SERVER_PORT || "3000");
 
-    //generate modoel dengan proomprt
-
-    const response = await fetch(`http://localhost:11434/${agentId}/message`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${settings.API_KEY}`,
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      `http://localhost:${serverPort}/${agentId}/message`,
+      {
         text: input,
         userId: "user",
         userName: "User",
-      }),
-    });
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${settings.API_KEY}`,
+        },
+      }
+    );
 
-    const data = await response.json();
+    const data = response.data;
     // Handle both array and single response formats
     const messages = Array.isArray(data) ? data : [data];
     messages.forEach((message) => console.log(`${"Agent"}: ${message.text}`));
